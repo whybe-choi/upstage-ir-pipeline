@@ -20,3 +20,24 @@ upstage-ir-pipeline
 ├── router.py
 └── vectorstore.py
 ```
+
+## How to use
+1. setup
+```
+git clone https://github.com/whybe-choi/upstage-ir-pipeline.git
+cd upstage-ir-pipeline
+pip install -r requirements.txt
+```
+2. save chroma to local
+```
+python vectorestore.py
+```
+
+3. change `.env.example` to `.env` & set `.env`
+```
+OPENAI_API_KEY=sk-
+```
+4. run pipeline
+```
+python main.py
+```
