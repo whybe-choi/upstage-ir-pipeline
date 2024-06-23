@@ -1,0 +1,14 @@
+transformers==4.38.2
+kiwipiepy
+langchain==0.1.12
+langchain-cohere==0.1.2
+langchain-community==0.0.28
+langchain-core==0.1.42
+langchain_openai==0.0.8
+langchain-text-splitters==0.0.1
+langchain_experimental==0.0.54
+faiss-cpu==1.8.0
+chromadb==0.4.24
+sentence-transformers==2.5.1
+python-dotenv
+rank_bm25
