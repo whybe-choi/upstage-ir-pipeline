@@ -1,8 +1,8 @@
 from query import load_data, extract_conversations, load_extract_query_chain, get_standalone_query, save_queries
 from router import load_router_chain, route
 from retriever import load_dense_retriever, load_sparse_retriever
+from reranker import load_reranker
 
-from langchain.retrievers import EnsembleRetriever
 import json
 
 def generate_submission(data, topics, queries, retriever, file_path):
@@ -12,13 +12,14 @@ def generate_submission(data, topics, queries, retriever, file_path):
 
         topk = []
         references = []
-        print(f"## eval_id: {data[idx]['eval_id']} ## Topic: {topic} ## Query: {query}")
+        print(f"## eval_id: {data[idx]['eval_id']:<5} ## Topic: {topic:<12} ## Query: {query}")
 
         if topic == "scientific":
-            retrieved_docs = retriever.get_relevant_documents(query)
+            retrieved_docs = retriever.invoke(query)
 
-            for doc in retrieved_docs:
+            for doc in retrieved_docs[:3]:
                 topk.append(doc.metadata['docid'])
+                # references.append({'score': float(score), 'content': doc.page_content})
                 references.append({'content': doc.page_content})
 
         submission['eval_id'] = data[idx]['eval_id']
@@ -36,8 +37,10 @@ def generate_submission(data, topics, queries, retriever, file_path):
 if __name__ == "__main__":
 
     # retriever 불러오기
-    dense_retriever = load_dense_retriever(persist_path='./chroma_db', k=3)
-    # sparse_retriever = load_sparse_retriever(data_path="./data/documents.jsonl", k=3)
+    dense_retriever = load_dense_retriever(persist_path='./chroma_db', k=50)
+
+    # reranker 불러오기
+    compression_retriever = load_reranker(dense_retriever)
 
     # 대화 데이터 불러오기
     data = load_data("./data/eval.jsonl")
@@ -45,7 +48,7 @@ if __name__ == "__main__":
     # 대화 데이터를 문자열 형태로 만들고 standalone query 생성을 위한 chain 불러오기
     # chain은 llm을 활용하는 부분이므로 teperature를 설정할 수 있도록 인자로 만듬.
     conversations = extract_conversations(data)
-    extract_query_chain = load_extract_query_chain(temperature=0.4)
+    extract_query_chain = load_extract_query_chain(temperature=0.3)
 
     # chain을 이용하여 standalone query 생성
     queries = get_standalone_query(extract_query_chain, conversations)
@@ -55,11 +58,11 @@ if __name__ == "__main__":
 
     # Router Model을 통해 standalone_query가 과학 상식 여부를 판단하기 위한 chain
     # chain은 llm을 활용하는 부분이므로 teperature를 설정할 수 있도록 인자로 만듬.
-    router = load_router_chain(temperature=0.3)
+    router = load_router_chain(temperature=0.1)
     
     # router를 활용하여 각 standalone_query의 과학 상식에 관한 질문인지를 판단
     topics = route(router, queries)
 
     # 추출한 topics와 queries를 바탕으로 과학 상식이라면 유사한 문서를 retrieval하고 제출 형태로 결과 저장
-    generate_submission(data, topics, queries, dense_retriever, "submission_pipe_sparse.csv")
+    generate_submission(data, topics, queries, compression_retriever, "submission.csv")
 
