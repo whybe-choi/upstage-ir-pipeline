@@ -1,9 +1,10 @@
 import json
 from langchain_community.vectorstores import Chroma
-from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings, OpenAIEmbeddings
 from langchain.docstore.document import Document
 from langchain_text_splitters import CharacterTextSplitter
 from sentence_transformers import SentenceTransformer
+
 
 
 def save_embed_model_to_local(model_name, model_path):
@@ -18,7 +19,18 @@ def load_embed_model_from_local(model_path):
     """
     Load the embed model from local
     """
-    embed_model = HuggingFaceEmbeddings(
+    class CustomEmbeddings(HuggingFaceEmbeddings):
+
+        def __init__(self, model_name, model_kwargs, encode_kwargs):
+            super().__init__(model_name=model_name, model_kwargs=model_kwargs, encode_kwargs=encode_kwargs)
+
+        def _embed_documents(self, texts):
+            return super().embed_documents(texts)
+        
+        def __call__(self, input):
+            return self._embed_documents(input)
+
+    embed_model = CustomEmbeddings(
         model_name=model_path,
         model_kwargs={"device": "cpu"},
         encode_kwargs={"normalize_embeddings": True},
