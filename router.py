@@ -26,8 +26,7 @@ def load_router_chain(temperature):
     structured_llm = llm.with_structured_output(RouteQuery)
 
     # Prompt
-    system = """You are an expert at routing a user question to the appropriate topic.
-    Base on the topic the question is referring to, route it to the relevant topic."""
+    system = "사용자의 대화 내역이 자연과학, 사회과학, 컴퓨터공학, 코딩, 수학, 의학, 정치, 사회, 지리, 경제, 일반상식 등의 지식을 요구하는 질문일 경우에는 scienctific이라고 답변해야 합니다."
 
     prompt = ChatPromptTemplate.from_messages(
         [
