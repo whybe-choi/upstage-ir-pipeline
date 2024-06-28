@@ -38,14 +38,14 @@ def load_extract_query_chain(temperature):
 
     # Prompt
     system = "당신은 대화 속에서 사용자가 원하는 정보가 무엇인지 쉽게 추출해내는 유능한 AI입니다."
-    human = """대화 이력이 [CONVERSATION]에 주어졌을 때, 대화 속에서 주어진 키워드나 정보를 바탕으로 사용자가 얻고자 하는 정보가 무엇인지만 질문 형태로 추출해주세요. 대화 이력이 하나밖에 없는 경우에는 대화 이력을 그대로 추출해야 합니다.
+    human = """대화 이력이 [CONVERSATION]에 주어졌을 때, 대화 속에서 주어진 키워드나 정보를 바탕으로 사용자가 얻고자 하는 정보가 최종적으로 무엇인지 질문 형태로 추출해주세요. 대화 이력이 하나밖에 없는 경우에는 대화 이력을 그대로 추출해야 합니다.
 
-    [CONVERSATION]
-    {conversation}
+[CONVERSATION]
+{conversation}
 
-    [OUTPUT]
-    {{"standalone_query" : $standalone_query}}
-    """
+[OUTPUT]
+{{"standalone_query" : $standalone_query}}
+"""
 
     prompt = ChatPromptTemplate.from_messages(
         [
