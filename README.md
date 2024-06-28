@@ -33,9 +33,8 @@ pip install -r requirements.txt
 ```
 2. save chroma to local
 ```
-python vectorestore.py
+python vectorstore.py
 ```
-
 3. change `.env.example` to `.env` & set `.env`
 ```
 OPENAI_API_KEY=sk-
