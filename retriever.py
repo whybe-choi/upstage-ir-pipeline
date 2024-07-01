@@ -35,13 +35,13 @@ def load_sparse_retriever(data_path, k):
     sparse_retriever = BM25Retriever.from_documents(documents, preprocess_func=kiwi_tokenize, k=k)
     return sparse_retriever
 
-def load_dense_retriever(persist_path, k):
+def load_dense_retriever(persist_path, model_path, k):
     """
     Load the dense retriever.
     """
     vector_index = Chroma(
         persist_directory=persist_path,
-        embedding_function=load_embed_model_from_local("./models/bge-m3"),
+        embedding_function=load_embed_model_from_local(model_path),
         collection_name="upstage-ir",
     )
 
@@ -75,7 +75,7 @@ def print_retrieved_docs(retriever):
 if __name__ == "__main__":
     # BM25를 활용하려면 대략 2시간 정도 걸림,,,
     sparse_retriever = load_sparse_retriever("./data/documents.jsonl", 3)
-    dense_retriever = load_dense_retriever("./chroma_db", 3)
+    dense_retriever = load_dense_retriever("./chroma_db", "./models/multilingual-e5-large-instruct", 3)
 
     ensemble_retriever = EnsembleRetriever(
         retrievers=[sparse_retriever, dense_retriever],
