@@ -15,7 +15,8 @@ def generate_submission(data, topics, queries, retriever, file_path):
         print(f"## eval_id: {data[idx]['eval_id']:<5} ## Topic: {topic:<12} ## Query: {query}")
 
         if topic == "scientific":
-            retrieved_docs = retriever.invoke(query)
+            task = "Instruct: Given a user query, retrieve relevant document that answer the query and contain important keywords\n Query: {}"
+            retrieved_docs = retriever.invoke(task.format(query))
             
             for doc in retrieved_docs[:3]:
                 topk.append(doc.metadata['docid'])
@@ -41,7 +42,11 @@ def generate_submission(data, topics, queries, retriever, file_path):
 if __name__ == "__main__":
 
     # retriever 불러오기
-    dense_retriever = load_dense_retriever(persist_path='./chroma_db', k=200)
+    dense_retriever = load_dense_retriever(
+        persist_path='./chroma_db', 
+        model_path="./models/multilingual-e5-large-instruct", 
+        k=200
+    )
 
     # reranker 불러오기
     compression_retriever = load_reranker(dense_retriever)
