@@ -43,3 +43,6 @@ OPENAI_API_KEY=sk-
 ```
 python main.py
 ```
+
+## Results
+<img width="1000" alt="image" src="https://github.com/whybe-choi/upstage-ir-pipeline/assets/64704608/340c725e-1623-4778-b688-bcde515586c9">
