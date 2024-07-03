@@ -80,8 +80,8 @@ def upload_to_vectorstore(documents, embed_model, persist_directory, collection_
 
 
 if __name__ == "__main__":
-    model_name = "intfloat/multilingual-e5-large-instruct"
-    model_path = "./models/multilingual-e5-large-instruct"
+    model_name = "BAAI/bge-m3"
+    model_path = "./models/bge-m3"
 
     save_embed_model_to_local(model_name, model_path)
     embed_model = load_embed_model_from_local(model_path)

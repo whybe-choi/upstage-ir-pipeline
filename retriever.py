@@ -61,21 +61,10 @@ def load_ensemble_retriever(dense_retriever, sparse_retriever, dense_weight, spa
     return ensemble_retriever
 
 
-def print_retrieved_docs(retriever):
-
-    retrieved = retriever.get_relevant_documents("피임을 위한 약") 
-
-    print("Query: 피임을 위한 약")
-    for idx, retrieved_doc in enumerate(retrieved):
-        print("="*30, f"문서 {idx+1}", "="*30)
-        pprint(retrieved_doc)
-        print("="*68)
-
-
 if __name__ == "__main__":
     # BM25를 활용하려면 대략 2시간 정도 걸림,,,
     sparse_retriever = load_sparse_retriever("./data/documents.jsonl", 3)
-    dense_retriever = load_dense_retriever("./chroma_db", "./models/multilingual-e5-large-instruct", 3)
+    dense_retriever = load_dense_retriever("./chroma_db", "./models/bge-m3", 3)
 
     ensemble_retriever = EnsembleRetriever(
         retrievers=[sparse_retriever, dense_retriever],
@@ -83,9 +72,6 @@ if __name__ == "__main__":
         search_kwargs={"k": 3},
     )
 
-    print("1. sparse retriever")
-    print_retrieved_docs(sparse_retriever)
-    print("2. dense retriever")
-    print_retrieved_docs(dense_retriever)
-    print("3. ensemble retriever")
-    print_retrieved_docs(ensemble_retriever)
+    docs = ensemble_retriever.get_relevant_documents("하늘이 파란 이유는?")
+    for doc in docs:
+        print(doc)

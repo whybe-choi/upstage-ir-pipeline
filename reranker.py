@@ -17,10 +17,18 @@ def load_reranker(retriever):
     return compression_retriever
 
 if __name__ == "__main__":
-    dense_retriever = load_dense_retriever(persist_path='./chroma_db', k=10)
+    dense_retriever = load_dense_retriever(
+        persist_path='./chroma_db', 
+        model_path="./models/bge-m3",
+        k=10
+    )
     compression_retriever = load_reranker(dense_retriever)
     compressed_docs = compression_retriever.invoke("하늘이 파란 이유는?")
 
-    for doc, score in compressed_docs:
+    for doc in compressed_docs:
         print(doc)
-        # print(score)
+
+    # # 라이브러리를 커스텀한 경우에 사용
+    # for doc, score in compressed_docs:
+    #     print(doc)
+    #     print(score)
