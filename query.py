@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_openai import ChatOpenAI
@@ -85,7 +89,7 @@ if __name__ == "__main__":
     data = load_data("./data/eval.jsonl")
 
     conversations = extract_conversations(data)
-    chain = load_extract_query_chain()
+    chain = load_extract_query_chain(temperature=0)
 
     responses = get_standalone_query(chain, conversations)
-    save_queries(data, responses, "standalone_query_v2.jsonl")
+    save_queries(data, responses, "standalone_query.jsonl")
