@@ -15,14 +15,14 @@ def generate_submission(data, topics, queries, retriever, file_path):
         print(f"## eval_id: {data[idx]['eval_id']:<5} ## Topic: {topic:<12} ## Query: {query}")
 
         if topic == "scientific":
-            task = "Instruct: Given a user query, retrieve relevant document that answer the query and contain important keywords\n Query: {}"
-            retrieved_docs = retriever.invoke(task.format(query))
+            retrieved_docs = retriever.invoke(query)
             
+            # 기본 라이브러리를 사용할 경우 이 부분을 사용함.
             for doc in retrieved_docs[:3]:
                 topk.append(doc.metadata['docid'])
                 references.append({'content': doc.page_content})
 
-            # 라이브러리 내부를 커스텀해서 점수가 나오도록 했음.
+            # # 라이브러리 내부를 커스텀해서 점수가 나오도록 했음.
             # for doc, score in retrieved_docs[:3]:
             #     topk.append(doc.metadata['docid'])
             #     references.append({'score': float(score), 'content': doc.page_content})
@@ -30,7 +30,6 @@ def generate_submission(data, topics, queries, retriever, file_path):
         submission['eval_id'] = data[idx]['eval_id']
         submission['standalone_query'] = query
         submission['topk'] = topk
-        # submission['answer'] = answer # 당장 답변은 중요한 부분이 아니므로 작성하지 않음.
         submission['references'] = references
         
         submissions.append(submission)
@@ -44,9 +43,23 @@ if __name__ == "__main__":
     # retriever 불러오기
     dense_retriever = load_dense_retriever(
         persist_path='./chroma_db', 
-        model_path="./models/multilingual-e5-large-instruct", 
-        k=200
+        model_path="./models/bge-m3", 
+        k=100
     )
+
+    ## sparse retriever -> it takes about 2 hours
+    # sparse_retriever = load_sparse_retriever(
+    #     data_path="./data/documents.jsonl",
+    #     k=100,
+    # )
+
+    ## ensemble_retriever
+    # ensemble_retriever = load_ensemble_retriever(
+    #     dense_retriever=dense_retriever,
+    #     sparse_retriever=sparse_retriever,
+    #     dense_weight=0.7,
+    #     sparse_weight=0.3,
+    # )
 
     # reranker 불러오기
     compression_retriever = load_reranker(dense_retriever)
@@ -55,18 +68,16 @@ if __name__ == "__main__":
     data = load_data("./data/eval.jsonl")
 
     # 대화 데이터를 문자열 형태로 만들고 standalone query 생성을 위한 chain 불러오기
-    # chain은 llm을 활용하는 부분이므로 teperature를 설정할 수 있도록 인자로 만듬.
     conversations = extract_conversations(data)
     extract_query_chain = load_extract_query_chain(temperature=0)
 
     # chain을 이용하여 standalone query 생성
     queries = get_standalone_query(extract_query_chain, conversations)
 
-    # local에 standalone_query를 jsonl 형태로 저장하여 사용하고 싶으면 해당 부분의 주석 해제
+    # local에 standalone_query를 jsonl 형태로 저장
     # save_queries(data, quries, "stadalone_query.jsonl")
 
     # Router Model을 통해 standalone_query가 과학 상식 여부를 판단하기 위한 chain
-    # chain은 llm을 활용하는 부분이므로 teperature를 설정할 수 있도록 인자로 만듬.
     router = load_router_chain(temperature=0)
     
     # router를 활용하여 각 standalone_query의 과학 상식에 관한 질문인지를 판단
